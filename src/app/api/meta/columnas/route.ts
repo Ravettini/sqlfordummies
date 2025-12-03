@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
         
         // Consultar información de columnas desde INFORMATION_SCHEMA
         // Usamos DATABASE() para obtener el schema actual
+        // Usamos UPPER() para hacer la búsqueda case-insensitive
         const columnInfo = await prisma.$queryRawUnsafe<any[]>(`
           SELECT 
             COLUMN_NAME as name,
@@ -57,7 +58,7 @@ export async function GET(request: NextRequest) {
             COLUMN_NAME as label
           FROM INFORMATION_SCHEMA.COLUMNS
           WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = '${escapedTable}'
+            AND UPPER(TABLE_NAME) = UPPER('${escapedTable}')
           ORDER BY ORDINAL_POSITION
         `)
 
@@ -105,8 +106,31 @@ export async function GET(request: NextRequest) {
     }
 
     if (columnas.length === 0) {
+      // Intentar obtener lista de tablas disponibles para ayudar al usuario
+      let availableTables: string[] = []
+      try {
+        const tables = await prisma.$queryRawUnsafe<any[]>(`
+          SELECT TABLE_NAME
+          FROM INFORMATION_SCHEMA.TABLES
+          WHERE TABLE_SCHEMA = DATABASE()
+            AND TABLE_TYPE = 'BASE TABLE'
+          ORDER BY TABLE_NAME
+        `)
+        if (Array.isArray(tables)) {
+          availableTables = tables.map((t: any) => t.TABLE_NAME)
+        }
+      } catch (e) {
+        // Ignorar error al obtener tablas disponibles
+      }
+
       return NextResponse.json(
-        { error: 'Tabla no encontrada o sin columnas' },
+        { 
+          error: `Tabla "${tabla}" no encontrada o sin columnas`,
+          availableTables: availableTables.length > 0 ? availableTables : undefined,
+          hint: availableTables.length > 0 
+            ? `Tablas disponibles: ${availableTables.join(', ')}`
+            : 'Verifica que el nombre de la tabla sea correcto'
+        },
         { status: 404 }
       )
     }

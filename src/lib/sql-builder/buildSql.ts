@@ -9,7 +9,7 @@
 import { QueryStructure, ColumnRef, Condition, OrderBy } from '../types/queryBuilder'
 
 // Lista blanca de tablas permitidas
-const ALLOWED_TABLES = ['dotacion_gcba_prueba', 'Padron']
+const ALLOWED_TABLES = ['dotacion_gcba_prueba', 'padron']
 
 // Lista blanca de columnas de dotacion_gcba_prueba
 const DOTACION_COLUMNS = [

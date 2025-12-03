@@ -13,7 +13,7 @@ export const ALLOWED_TABLES = [
     description: 'Tabla principal de dotación del GCBA',
   },
   {
-    name: 'Padron',
+    name: 'padron',
     label: 'Padrón',
     description: 'Tabla de padrón',
   },

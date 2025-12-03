@@ -55,11 +55,30 @@ export default function QueryBuilder() {
   useEffect(() => {
     if (selectedTable) {
       setColumns([]) // Limpiar columnas anteriores
-      fetch(`/api/meta/columnas?tabla=${selectedTable}`)
+      setError(null) // Limpiar errores anteriores
+      
+      fetch(`/api/meta/columnas?tabla=${encodeURIComponent(selectedTable)}`)
         .then(res => {
           if (!res.ok) {
             return res.json().then(err => {
-              console.error('Error obteniendo columnas:', err)
+              const errorMsg = err.error || 'Error al obtener las columnas'
+              const hint = err.hint || ''
+              const availableTables = err.availableTables || []
+              
+              console.error('Error obteniendo columnas:', {
+                error: errorMsg,
+                hint,
+                availableTables,
+                fullError: err
+              })
+              
+              // Mostrar error más descriptivo al usuario
+              if (availableTables.length > 0) {
+                setError(`⚠️ ${errorMsg}. ${hint}`)
+              } else {
+                setError(`⚠️ ${errorMsg}`)
+              }
+              
               setColumns([])
               return Promise.reject(err)
             })
@@ -70,13 +89,19 @@ export default function QueryBuilder() {
           // Asegurarse de que data sea un array
           if (Array.isArray(data)) {
             setColumns(data)
+            setError(null) // Limpiar error si se cargaron correctamente
           } else {
             console.error('Respuesta de columnas no es un array:', data)
+            setError('⚠️ Error: La respuesta del servidor no es válida')
             setColumns([])
           }
         })
         .catch(err => {
           console.error('Error cargando columnas:', err)
+          // El error ya se estableció en el bloque anterior si fue un error HTTP
+          if (!error) {
+            setError('⚠️ Error al cargar las columnas. Verifica la conexión.')
+          }
           setColumns([])
         })
     }
