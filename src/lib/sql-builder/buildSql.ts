@@ -9,7 +9,7 @@
 import { QueryStructure, ColumnRef, Condition, OrderBy } from '../types/queryBuilder'
 
 // Lista blanca de tablas permitidas
-const ALLOWED_TABLES = ['dotacion_gcba_prueba']
+const ALLOWED_TABLES = ['dotacion_gcba_prueba', 'Padron']
 
 // Lista blanca de columnas de dotacion_gcba_prueba
 const DOTACION_COLUMNS = [
@@ -55,14 +55,34 @@ function validateTable(tableName: string): void {
 }
 
 /**
+ * Valida que un nombre de columna sea seguro (solo letras, números, guiones bajos)
+ */
+function isValidColumnName(columnName: string): boolean {
+  // Solo permite letras, números, guiones bajos y guiones
+  // Esto previene inyección SQL básica
+  return /^[a-zA-Z0-9_\-]+$/.test(columnName)
+}
+
+/**
  * Valida que una columna exista en la tabla especificada
  */
 function validateColumn(tableName: string, columnName: string): void {
   validateTable(tableName)
-  const allowedColumns = TABLE_COLUMNS[tableName] || []
-  if (!allowedColumns.includes(columnName)) {
-    throw new Error(`Columna no permitida: ${columnName} en tabla ${tableName}`)
+  
+  // Validar que el nombre de la columna sea seguro
+  if (!isValidColumnName(columnName)) {
+    throw new Error(`Nombre de columna inválido: ${columnName}`)
   }
+  
+  // Si la tabla tiene una lista estática de columnas, validar contra ella
+  const allowedColumns = TABLE_COLUMNS[tableName]
+  if (allowedColumns && allowedColumns.length > 0) {
+    if (!allowedColumns.includes(columnName)) {
+      throw new Error(`Columna no permitida: ${columnName} en tabla ${tableName}`)
+    }
+  }
+  // Si no hay lista estática, confiamos en que el frontend solo muestra columnas válidas
+  // obtenidas de la API, y validamos solo que el nombre sea seguro
 }
 
 /**

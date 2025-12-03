@@ -12,6 +12,11 @@ export const ALLOWED_TABLES = [
     label: 'Dotación GCBA (Prueba)',
     description: 'Tabla principal de dotación del GCBA',
   },
+  {
+    name: 'Padron',
+    label: 'Padrón',
+    description: 'Tabla de padrón',
+  },
 ]
 
 // Columnas de dotacion_gcba_prueba con sus tipos
@@ -52,11 +57,15 @@ export function getTables() {
 
 /**
  * Obtiene las columnas de una tabla específica
+ * Para tablas conocidas, devuelve las columnas estáticas
+ * Para otras tablas permitidas, se pueden obtener dinámicamente desde la base de datos
  */
 export function getColumns(tableName: string) {
   if (tableName === 'dotacion_gcba_prueba') {
     return DOTACION_COLUMNS
   }
+  // Para otras tablas permitidas, se obtendrán dinámicamente desde la API
+  // Por ahora retornamos array vacío, la API las obtendrá de la BD
   return []
 }
 
