@@ -37,7 +37,12 @@ npm install
 Crea un archivo `.env` en la raíz del proyecto con la siguiente estructura:
 
 ```env
-DATABASE_URL="mysql://powerbi:powerbi1063@phpmyadminny.sectc.app:3306/padron"
+DATABASE_URL="mysql://usuario:contraseña@servidor:3306/nombre_base_datos"
+```
+
+**Ejemplo**:
+```env
+DATABASE_URL="mysql://usuario:password@servidor.com:3306/padron"
 ```
 
 **⚠️ IMPORTANTE**: En producción, se recomienda crear un usuario de MySQL con permisos de solo lectura:

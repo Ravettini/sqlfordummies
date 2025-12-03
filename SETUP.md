@@ -13,7 +13,12 @@ npm install
 Crea un archivo `.env` en la raíz del proyecto con el siguiente contenido:
 
 ```env
-DATABASE_URL="mysql://powerbi:powerbi1063@phpmyadminny.sectc.app:3306/padron"
+DATABASE_URL="mysql://usuario:contraseña@servidor:3306/nombre_base_datos"
+```
+
+**Ejemplo**:
+```env
+DATABASE_URL="mysql://usuario:password@servidor.com:3306/padron"
 ```
 
 ### 3. Generar cliente de Prisma
