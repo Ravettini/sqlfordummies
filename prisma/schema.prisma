@@ -1,0 +1,44 @@
+// Schema de Prisma para la base de datos MySQL 'padron'
+// Tabla principal: dotacion_gcba_prueba
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// Modelo principal: tabla dotacion_gcba_prueba
+// Mapea todos los campos según la estructura real de la base de datos
+model DotacionGcbaPrueba {
+  id_dotacion        Int       @id @default(autoincrement()) @map("id_dotacion")
+  MINISTERIO         String?   @db.VarChar(255) @map("MINISTERIO")
+  CUIL               String?   @db.VarChar(255) @map("CUIL")
+  AYN                String?   @db.VarChar(255) @map("AYN")
+  FEC_NACIM          DateTime? @db.DateTime @map("FEC_NACIM")
+  SEXO               String?   @db.VarChar(10) @map("SEXO")
+  TIP_DOC            String?   @db.VarChar(50) @map("TIP_DOC")
+  NUM_DOC            String?   @db.VarChar(50) @map("NUM_DOC")
+  INGRESO            DateTime? @db.DateTime @map("INGRESO")
+  ROL                Int?      @map("ROL")
+  LIT_PUESTO         String?   @db.VarChar(255) @map("LIT_PUESTO")
+  REGIMEN            String?   @db.VarChar(255) @map("REGIMEN")
+  SIGLA              String?   @db.VarChar(50) @map("SIGLA")
+  COD_REP            String?   @db.VarChar(50) @map("COD_REP")
+  DESC_REP           String?   @db.VarChar(255) @map("DESC_REP")
+  PATH_NOMBRES       String?   @db.VarChar(255) @map("PATH_NOMBRES")
+  DOMICILIO_LABORAL  String?   @db.VarChar(255) @map("DOMICILIO_LABORAL")
+  LIT_AGRUPAMIENTO   String?   @db.VarChar(255) @map("LIT_AGRUPAMIENTO")
+  MAIL_LABORAL       String?   @db.VarChar(255) @map("MAIL_LABORAL")
+  MAIL_PERSONAL      String?   @db.VarChar(255) @map("MAIL_PERSONAL")
+  MAIL_MIA           String?   @db.VarChar(255) @map("MAIL_MIA")
+  DOMICILIO_PERSONAL String?   @db.VarChar(255) @map("DOMICILIO_PERSONAL")
+  CP                 String?   @db.VarChar(20) @map("CP")
+  DISCAP             String?   @db.VarChar(50) @map("DISCAP")
+  CUIL_SIN_GUIONES   String?   @db.VarChar(255) @map("CUIL_SIN_GUIONES")
+
+  @@map("dotacion_gcba_prueba")
+}
+
