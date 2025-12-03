@@ -54,10 +54,31 @@ export default function QueryBuilder() {
   // Cargar columnas cuando cambia la tabla seleccionada
   useEffect(() => {
     if (selectedTable) {
+      setColumns([]) // Limpiar columnas anteriores
       fetch(`/api/meta/columnas?tabla=${selectedTable}`)
-        .then(res => res.json())
-        .then(data => setColumns(data))
-        .catch(err => console.error('Error cargando columnas:', err))
+        .then(res => {
+          if (!res.ok) {
+            return res.json().then(err => {
+              console.error('Error obteniendo columnas:', err)
+              setColumns([])
+              return Promise.reject(err)
+            })
+          }
+          return res.json()
+        })
+        .then(data => {
+          // Asegurarse de que data sea un array
+          if (Array.isArray(data)) {
+            setColumns(data)
+          } else {
+            console.error('Respuesta de columnas no es un array:', data)
+            setColumns([])
+          }
+        })
+        .catch(err => {
+          console.error('Error cargando columnas:', err)
+          setColumns([])
+        })
     }
   }, [selectedTable])
 

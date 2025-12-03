@@ -46,8 +46,7 @@ export async function GET(request: NextRequest) {
         }
         
         // Escapar el nombre de la tabla para prevenir inyección SQL
-        // Como ya validamos que solo contiene caracteres seguros, podemos usar backticks
-        const escapedTable = tabla.replace(/`/g, '``')
+        const escapedTable = tabla.replace(/'/g, "''")
         
         // Consultar información de columnas desde INFORMATION_SCHEMA
         // Usamos DATABASE() para obtener el schema actual
@@ -58,19 +57,48 @@ export async function GET(request: NextRequest) {
             COLUMN_NAME as label
           FROM INFORMATION_SCHEMA.COLUMNS
           WHERE TABLE_SCHEMA = DATABASE()
-            AND TABLE_NAME = '${escapedTable.replace(/'/g, "''")}'
+            AND TABLE_NAME = '${escapedTable}'
           ORDER BY ORDINAL_POSITION
         `)
 
-        columnas = columnInfo.map((col: any) => ({
-          name: col.name,
-          type: mapDataTypeToColumnType(col.type),
-          label: col.label,
-        }))
-      } catch (dbError) {
+        // Asegurarse de que columnInfo sea un array
+        if (Array.isArray(columnInfo) && columnInfo.length > 0) {
+          columnas = columnInfo.map((col: any) => ({
+            name: col.name,
+            type: mapDataTypeToColumnType(col.type),
+            label: col.label || col.name,
+          }))
+          console.log(`Columnas obtenidas para ${tabla}:`, columnas.length)
+        } else {
+          // Si no se encontraron columnas, puede ser que la tabla no exista o tenga otro nombre
+          console.warn(`No se encontraron columnas para la tabla: ${tabla}. Resultado de query:`, columnInfo)
+          
+          // Intentar verificar si la tabla existe con otro formato (case-insensitive)
+          try {
+            const tableCheck = await prisma.$queryRawUnsafe<any[]>(`
+              SELECT TABLE_NAME
+              FROM INFORMATION_SCHEMA.TABLES
+              WHERE TABLE_SCHEMA = DATABASE()
+                AND TABLE_NAME LIKE '%${escapedTable}%'
+              LIMIT 5
+            `)
+            if (Array.isArray(tableCheck) && tableCheck.length > 0) {
+              console.log(`Tablas similares encontradas:`, tableCheck.map((t: any) => t.TABLE_NAME))
+            }
+          } catch (checkError) {
+            console.error('Error verificando existencia de tabla:', checkError)
+          }
+          
+          columnas = []
+        }
+      } catch (dbError: any) {
         console.error('Error obteniendo columnas de BD:', dbError)
+        // Si hay un error de conexión o de query, devolver error 500
         return NextResponse.json(
-          { error: 'Error al obtener las columnas de la base de datos' },
+          { 
+            error: 'Error al obtener las columnas de la base de datos',
+            details: process.env.NODE_ENV === 'development' ? dbError.message : undefined
+          },
           { status: 500 }
         )
       }
